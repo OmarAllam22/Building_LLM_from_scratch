@@ -8,7 +8,7 @@ class SimpleTokenizer:
         with open(file_path, "r") as f:
             txt = f.read()
             txt = re.findall(r"\w+|[^\w\s]", txt)
-            txt += ["<UNK>", "EndOfFile"]
+            txt += ["<|UNK|>", "<|EndOfFile|>"]
             vocabs_dict = dict(enumerate(set(txt)))
 
         self.int2str = vocabs_dict
@@ -16,12 +16,14 @@ class SimpleTokenizer:
     
     @validate_call
     def encode(self, txt: str) -> list[int]:
-        return [self.str2int.get(token, self.str2int["<UNK>"]) for token in txt.split()]
+        return [self.str2int.get(token) for token in txt.split() + ["<|EndOfFile|>"]]
     
     @validate_call
     def decode(self, token_ids: list[int]) -> str:
-        return " ".join([self.int2str.get(id, "<UNK>") for id in token_ids])
+        return " ".join([self.int2str.get(id, "<|UNK|>") for id in token_ids])
 
+
+#example usage
 o = SimpleTokenizer(file_path="the-verdict.txt")
 ids = o.encode("How are you there")
 o.decode(ids)

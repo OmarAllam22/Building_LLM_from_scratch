@@ -1,3 +1,5 @@
+# coding simple tokenizer (each word or punctuation is represented as a token)
+
 from pydantic import validate_call, FilePath
 import re
 

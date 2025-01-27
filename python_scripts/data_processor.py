@@ -1,3 +1,8 @@
+# this file contains three classes:
+# 1. GPT2Dataset: that wraps the text to Dataset object
+# 2. GPT2DataLoader: that wraps the text to Dataloader object
+# 3. GPT2ProcessorPipeLine: that build the dataset and dataloader and then return the embedding after passing the embedding weights.
+
 import tiktoken, torch
 from torch.utils.data import Dataset, DataLoader
 from pydantic import FilePath

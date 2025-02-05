@@ -38,3 +38,26 @@ Dropout in the attention mechanism is typically applied at two specific times:
 ![alt text](assets/image5.png)
 
 >Additionally, we added an **output projection layer** (self.out_proj) to `MultiHeadAttention` after combining the heads, which is not present in the CausalAttention class. This output projection layer is not strictly necessary (see appendix B for more details), but it is commonly used in many LLM architectures, which is why I added it here for completeness.
+
+> Logic of making MultiHead Attention in one matrix multiplication independently is that:<br><br>
+> * Input_vector shape is `(batch_size, context_length, out_dim)` whereis **out_dim = num_heads * head_dim**
+> * We `.view()` this Input_vector of shape `(batch_size, context_length, out_dim)` --> `(batch_size, context_length, num_heads, head_dim)`
+> * Then we `.transpose(1,2)` to make the shpae `(batch_size, num_heads, context_length, head_dim)`
+> * Then we make the dot product and mask along the last two dimensions ***context_length & num_head***
+> * The output **context_vector** now is of shape `(batch_size, num_heads,context_length, head_dim)`
+> * Redo the `.transpose(1,2)` we made.
+> * Then `.view(batch_size, context_length, out_dim)` to redo the original `.view()`.
+>> To determine whether the two operations result in the same vector or just the same shape, let's analyze each operation step by step.
+>>  * **First Operation:**<br>
+        Start with a vector of shape (2, 64, 10).
+        Apply `.view(2, 64, 5, 2)`: This reshapes the vector to (2, 64, 5, 2). The total number of elements remains the same (2 * 64 * 10 = 1280).<br>
+        Then apply `.transpose(1, 2)`: This swaps the second and third dimensions, resulting in a shape of (2, 5, 64, 2).
+>>  * **Second Operation:**<br>
+        Start with the same vector of shape (2, 64, 10).
+        Apply `.view(2, 5, 64, 2)`: This also reshapes the vector to (2, 5, 64, 2).
+>>  * **Comparison:**<br>
+            Both operations result in a tensor of shape (2, 5, 64, 2).
+            **However, the contents of the tensors may differ.** The first operation involves a transpose, which changes the order of the elements in the tensor, while the second operation simply reshapes the tensor without changing the order of the elements.
+
+### Note:
+> logical Order above of .transpose() then .view() is important. 

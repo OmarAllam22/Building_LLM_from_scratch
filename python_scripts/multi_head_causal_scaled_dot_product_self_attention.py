@@ -11,9 +11,13 @@ class MultiHeadAttention(CausalAttention):
         self.out_proj = nn.Linear(self.out_dim, self.out_dim)  # output projection layer
         
     def forward(self, x):
-        self.q_w = self.queries(x).view(x.shape[0], self.num_heads ,x.shape[1], self.head_dim) # self.queries(x) result of shape: (batch_size, num_tokens, d_out) ... d_out = head_dim * num_heads ... we just .view() this shape
-        self.k_w = self.keys(x).view(x.shape[0], self.num_heads ,x.shape[1], self.head_dim)
-        self.v_w = self.values(x).view(x.shape[0], self.num_heads ,x.shape[1], self.head_dim)
+        self.q_w = self.queries(x).view(x.shape[0], x.shape[1], self.num_heads, self.head_dim) # self.queries(x) result of shape: (batch_size, num_tokens, d_out) ... d_out = head_dim * num_heads ... we just .view() this shape
+        self.k_w = self.keys(x).view(x.shape[0], x.shape[1], self.num_heads, self.head_dim)
+        self.v_w = self.values(x).view(x.shape[0], x.shape[1], self.num_heads, self.head_dim)
+
+        self.k_w = self.k_w.transpose(1,2)
+        self.q_w = self.q_w.transpose(1,2)
+        self.v_w = self.v_w.transpose(1,2)
 
         self.attn_scores = self.q_w @ self.k_w.transpose(2,3)   # self.q_w, self.k_w of shape : (batch_size, num_heads , num_tokens, head_dim) ... d_out = num_heads * head_dim
                                                                 # self.attn_scores of shape : (batch_size, num_heads , num_tokens, num_tokens)    

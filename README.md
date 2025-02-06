@@ -2,7 +2,7 @@
 This repository contains code implementation with **my modifications** for the book [Building LLM from scratch](https://github.com/rasbt/LLMs-from-scratch).
 
 # Notes:
-
+### Chapter 3: `Coding Attention Mechanism`
 ![alt text](assets/image.png)
 
 > We can improve the SelfAttention_v1 implementation further by utilizing PyTorch’s nn.Linear layers, which effectively perform matrix multiplication when the bias units are disabled. Additionally, a significant advantage of using nn.Linear instead of manually implementing nn.Parameter(torch.rand(...)) is that nn.Linear has an optimized weight initialization scheme, contributing to more stable and effective model training.
@@ -59,5 +59,24 @@ Dropout in the attention mechanism is typically applied at two specific times:
             Both operations result in a tensor of shape (2, 5, 64, 2).
             **However, the contents of the tensors may differ.** The first operation involves a transpose, which changes the order of the elements in the tensor, while the second operation simply reshapes the tensor without changing the order of the elements.
 
-### Note:
+-->  Note:
 > logical Order above of .transpose() then .view() is important. 
+______________________________________________________
+
+### Chapter 4: Reproducing GPT-2
+
+> torch.nn.Embedding is just a look up table weights.
+```python
+import torch
+vocab_size = 1024
+embedding_dim = 768 
+emb_layer = torch.nn.Embedding(vocab_size, embedding_dim)
+# If I run my input on the randomly generated look up embedding
+inp1 = torch.tensor([1,2,3])
+emb1 = emb_layer(inp1) # shape: (3, 768) 
+
+# if my input containes number >= 1024 (vocab_size), I will get an error IndexOutOfRange as the following.
+inp2 = torch.tensor([1024,2,3])
+emb2 = emb_layer(inp2)
+```
+> The above indicates that, we tokenize our input **(giviing it  number between 0 and vocab_size)** before passing it to embedding layer thus ensuring that our input won't contain out of index numbers.

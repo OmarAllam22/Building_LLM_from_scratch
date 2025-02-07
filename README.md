@@ -80,3 +80,22 @@ inp2 = torch.tensor([1024,2,3])
 emb2 = emb_layer(inp2)
 ```
 > The above indicates that, we tokenize our input **(giviing it  number between 0 and vocab_size)** before passing it to embedding layer thus ensuring that our input won't contain out of index numbers.
+
+> Training deep neural networks with many layers can sometimes prove challenging due to problems like **vanishing or exploding gradients**.
+
+> The main idea behind layer normalization is to adjust the activations (outputs) of a neural network layer to have a mean of 0 and a variance of 1. It is normally applied before and after multi-head-attention.
+
+> ![alt text](image.png)
+
+> This value is very close to 0, but it is not exactly 0 due to small numerical errors that can accumulate because of the finite precision with which computers represent numbers.
+
+> The variable eps is a small constant (epsilon) added to the variance to prevent division by zero during normalization
+
+>  For LLMs, where the embedding dimension n is significantly large, the difference between using n and n – 1 is practically negligible
+
+>  Unlike batch normalization, which normalizes across the batch dimension, layer normalization normalizes across the feature dimension
+
+> Let’s discuss the concept behind shortcut connections, also known as skip or residual connections. Originally, shortcut connections were proposed for deep networks in computer vision (specifically, in residual networks) to mitigate the challenge of vanishing gradients.
+
+> he idea is that the self-attention mechanism in the multi-head attention block identifies and analyzes relationships between elements in the input sequence. In contrast, the feed forward network modifies the data individually at each position
+

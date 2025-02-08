@@ -85,7 +85,7 @@ emb2 = emb_layer(inp2)
 
 > The main idea behind layer normalization is to adjust the activations (outputs) of a neural network layer to have a mean of 0 and a variance of 1. It is normally applied before and after multi-head-attention.
 
-> ![alt text](image.png)
+> ![alt text](assets/image6.png)
 
 > This value is very close to 0, but it is not exactly 0 due to small numerical errors that can accumulate because of the finite precision with which computers represent numbers.
 
@@ -99,3 +99,22 @@ emb2 = emb_layer(inp2)
 
 > he idea is that the self-attention mechanism in the multi-head attention block identifies and analyzes relationships between elements in the input sequence. In contrast, the feed forward network modifies the data individually at each position
 
+> ![alt text](assets/image7.png)
+
+```python
+def generate_text_simple(model, idx,                 #1
+                         max_new_tokens, context_size): 
+    for _ in range(max_new_tokens):
+        idx_cond = idx[:, -context_size:]    #2
+        with torch.no_grad():
+            logits = model(idx_cond)
+
+        logits = logits[:, -1, :]                    #3
+        probas = torch.softmax(logits, dim=-1)           #4
+        idx_next = torch.argmax(probas, dim=-1, keepdim=True)    #5
+        idx = torch.cat((idx, idx_next), dim=1)     #6
+    return idx
+```
+> #### #2 Crops current context if it exceeds the supported context size, e.g., if LLM supports only 5 tokens, and the context size is 10, then only the last 5 tokens are used as context 
+> **It iterates for a specified number of new tokens to be generated, crops the current context to fit the model’s maximum context size**, computes predictions, and then selects the next token based on the highest probability prediction. <br><br>
+> To code the `generate_text_simple function`, we use **a softmax function** to convert the logits into a probability distribution from which we identify the position with the highest value via torch.argmax. The `softmax` function is **monotonic**, meaning it preserves the order of its inputs when transformed into outputs. So, in practice, the softmax step is redundant since the position with the highest score in the softmax output tensor is the same position in the logit tensor. In other words, we could apply the `torch.argmax` function to the logits tensor directly and get identical results. However, I provide the code for the conversion to illustrate the full process of transforming logits to probabilities, which can add additional intuition so that the model generates the most likely next token, which is known as greedy decoding.

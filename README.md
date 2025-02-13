@@ -134,3 +134,11 @@ self.repeated_transformer_blocks = nn.ModuleList(
 # input x of pos_emb must be converted to arange(num_tokens)
 x = self.token_emb(x) + self.pos_emb(torch.arange(x.shape[-1]))
 ```
+
+### Chapter 5: Pretraining
+
+
+> **`Perplexity`** is a measure **often used alongside cross entropy loss to evaluate the performance of models in tasks like language modeling**. It can provide a more interpretable way to understand the uncertainty of a model in predicting the next token in a sequence.<br><br>
+> Perplexity measures how well the probability distribution predicted by the model matches the actual distribution of the words in the dataset. <br><br>Similar to the loss, **a lower perplexity indicates that the model predictions are closer to the actual distribution**.<br><br>
+> ![alt text](assets/image8.png)
+

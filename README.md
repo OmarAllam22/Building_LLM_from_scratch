@@ -142,3 +142,51 @@ x = self.token_emb(x) + self.pos_emb(torch.arange(x.shape[-1]))
 > Perplexity measures how well the probability distribution predicted by the model matches the actual distribution of the words in the dataset. <br><br>Similar to the loss, **a lower perplexity indicates that the model predictions are closer to the actual distribution**.<br><br>
 > ![alt text](assets/image8.png)
 
+>  in practice, it can also be beneficial to **train an LLM with variable-length inputs** to help the LLM to better generalize across different types of inputs when it is being used.
+
+> when the model is in evaluation mode `model.eval()`, **gradient tracking** and **dropout** are disabled.
+
+> Adam optimizers are a popular choice for training deep neural networks. However, in our training loop, we opt for the AdamW optimizer. AdamW is a variant of Adam that improves the weight decay approach, which aims to minimize model complexity and prevent overfitting by penalizing larger weights. This adjustment allows AdamW to achieve more effective regularization and better generalization; thus, **`AdamW` is frequently used in the training of LLMs**.
+
+> This memorization or overfitting is expected since we are working with a very, very small training dataset and training the model for multiple epochs. *Usually, it’s common to train a model on a much larger dataset for **only one epoch**.*
+________________________________________
+
+> As we can see, the word forward is sampled most of the time (582 out of 1,000 times), but other tokens such as closer, inches, and toward will also be sampled some of the time. This means that if we replaced the argmax function with the multinomial function inside the generate_and_print_sample function, the LLM would sometimes generate texts such as every effort moves you toward, every effort moves you inches, and every effort moves you closer instead of every effort moves you forward. <br><br>We can further control the distribution and selection process via a concept called temperature scaling. Temperature scaling is just a fancy description for dividing the logits by a number greater than 0:
+
+
+> A temperature of 1 divides the logits by 1 before passing them to the softmax function to compute the probability scores. In other words, using a temperature of 1 is the same as not using any temperature scaling. In this case, the tokens are selected with a probability equal to the original softmax probability scores via the multinomial sampling function in PyTorch. For example, for the temperature setting 1, the token corresponding to “forward” would be selected about 60% of the time, as we can see in figure 5.14. <br><br>Also, as we can see in figure 5.14, applying very small temperatures, such as 0.1, will result in sharper distributions such that the behavior of the multinomial function selects the most likely token (here, "forward") almost 100% of the time, approaching the behavior of the argmax function. Likewise, a temperature of 5 results in a more uniform distribution where other tokens are selected more often. This can add more variety to the generated texts but also more often results in nonsensical text. For example, using the temperature of 5 results in texts such as every effort moves you pizza about 4% of the time.
+
+> ![alt text](assets/image9.png)
+
+effect of temperature scaling.
+
+> ![alt text](assets/image10.png)
+
+effect of top-k sampling combined with temperature scaling.
+
+> ![alt text](assets/image11.png)
+
+> "model.pth" is the filename where the state_dict is saved. The .pth extension is a convention for PyTorch files, though **we could technically use any file extension**.
+
+> If we plan to continue pretraining a model later for example, using the train_model_simple function we defined earlier in this chapter **saving the optimizer state is also recommended**.<br><br> Adaptive optimizers such as **`AdamW` store additional parameters for each model weight**. AdamW uses historical data to adjust learning rates for each model parameter dynamically. Without it, the optimizer resets, and the model may learn suboptimally or even fail to converge properly, which means it will lose the ability to generate coherent text. <br><br>
+Using `torch.save`, we can **save both the model and optimizer** state_dict contents
+```python
+torch.save({
+    "model_state_dict": model.state_dict(),
+    "optimizer_state_dict": optimizer.state_dict(),
+    }, 
+    "model_and_optimizer.pth"
+)
+```
+
+```python
+checkpoint = torch.load("model_and_optimizer.pth", map_location=device)
+
+model = GPTModel(GPT_CONFIG_124M)
+model.load_state_dict(checkpoint["model_state_dict"])
+
+optimizer = torch.optim.AdamW(model.parameters(), lr=5e-4, weight_decay=0.1)
+optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+
+model.train();
+```

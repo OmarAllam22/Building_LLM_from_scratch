@@ -1,6 +1,6 @@
 import torch 
 import torch.nn as nn
-from causal_scaled_dot_product_self_attention import CausalAttention
+from python_scripts.causal_scaled_dot_product_self_attention import CausalAttention
 
 class MultiHeadAttention(CausalAttention):
     def __init__(self, *args, num_heads=2, **kwargs):

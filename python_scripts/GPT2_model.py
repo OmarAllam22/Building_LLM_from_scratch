@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
-
-from multi_head_causal_scaled_dot_product_self_attention import MultiHeadAttention 
+from python_scripts.multi_head_causal_scaled_dot_product_self_attention import MultiHeadAttention 
 class TransformerBasicBlock(nn.Module):
     def __init__(self, cfg):
         super().__init__()

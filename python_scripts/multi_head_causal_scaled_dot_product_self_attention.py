@@ -23,7 +23,7 @@ class MultiHeadAttention(CausalAttention):
                                                                 # self.attn_scores of shape : (batch_size, num_heads , num_tokens, num_tokens)    
         self.register_buffer(
             'mask',
-            torch.triu(torch.ones(x.shape[1], x.shape[1]),diagonal=1).bool()   # x.shape[1] is the context_length or num_tokens
+            torch.triu(torch.ones(x.shape[1], x.shape[1], device=x.device),diagonal=1).bool()   # x.shape[1] is the context_length or num_tokens
         )
         self.attn_scores.masked_fill_(self.mask[:x.shape[1],:x.shape[1]], -torch.inf)  # Note self.mask doesn't change from the definition of parent class CausalAttention.
                                                   # but we didn't run super().forward() in which self.mask is registered ... we ran only super().__init__() 

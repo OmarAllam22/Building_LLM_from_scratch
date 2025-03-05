@@ -45,7 +45,7 @@ class GPT2Model(nn.Module):
         self.out_layer = nn.Linear(cfg['emb_dim'],cfg['vocab_size'], bias=False) # bias equals false, to make weights dimension the same as nn.Embedding to use `weight_tying` if needed
 
     def forward(self, x):
-        x = self.token_emb(x) + self.pos_emb(torch.arange(x.shape[-1]))
+        x = self.token_emb(x) + self.pos_emb(torch.arange(x.shape[-1],device=x.device))
         x = self.dropout(x)
         x = self.repeated_transformer_blocks(x)
         x = self.final_layer_norm(x)

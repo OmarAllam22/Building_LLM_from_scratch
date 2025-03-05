@@ -219,7 +219,7 @@ neg_avg_log_probas = torch.mean(log_probas) * -1  # this conversion is known as 
 print("neg_avg_log_probas: ", neg_avg_log_probas)
 ```
 --------------------------------------------------
-> The above is encapsulated in torch.cross
+> The above is encapsulated in `torch.nn.functional.cross_entropy()`
 ```python
 logits_flattened = logits.flatten(0,1)  # logits_flattened (batch*num_tokens, vocab_size)
 targets_flattened = targets.flatten()    # targets_flattened (batch*num_tokens)

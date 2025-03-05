@@ -190,3 +190,40 @@ optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
 
 model.train();
 ```
+_________________
+
+> In the training process:
+> we want to get the probabilities of the output **`but not all of them`**. We want only the ones corresponding to target_tokens (in order to maximize them). Therefore, we get `probas = probas[idx, [0,1,2], targets[idx]]`   
+```python
+inputs = torch.tensor([[16833, 3626, 6100],   # ["every effort moves",
+                       [40,    1107, 588]])   #  "I really like"]
+
+targets = torch.tensor([[3626, 6100, 345  ],  # [" effort moves you",
+                        [1107, 588, 11311]])
+
+with torch.no_grad():     
+    logits = model(inputs)
+
+probas = torch.softmax(logits, dim=-1)   # logits --> (batch, num_tokens, vocab_size)
+                                         # targets --> (batch, num_tokens)
+idx = 0
+Output_probas_corresponding_to_target_tokens_batch_1 = probas[idx, [0,1,2], targets[idx]]
+
+idx = 1
+Output_probas_corresponding_to_target_tokens_batch_2 = probas[idx, [0,1,2], targets[idx]]
+
+log_probas = torch.log(torch.cat((Output_probas_corresponding_to_target_tokens_batch_1, 
+                                  Output_probas_corresponding_to_target_tokens_batch_2),dim=0)
+                                  )
+neg_avg_log_probas = torch.mean(log_probas) * -1  # this conversion is known as cross_entropy
+print("neg_avg_log_probas: ", neg_avg_log_probas)
+```
+--------------------------------------------------
+> The above is encapsulated in torch.cross
+```python
+logits_flattened = logits.flatten(0,1)  # logits_flattened (batch*num_tokens, vocab_size)
+targets_flattened = targets.flatten()    # targets_flattened (batch*num_tokens)
+loss = torch.nn.functional.cross_entropy(logits_flattened, targets_flattened)
+print("corss_entropy_loss: ", loss)
+print("perplexity is: ", torch.exp(loss))
+```

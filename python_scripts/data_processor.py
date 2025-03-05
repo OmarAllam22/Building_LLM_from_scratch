@@ -3,7 +3,7 @@
 # 2. GPT2DataLoader: that wraps the text to Dataloader object
 # 3. GPT2ProcessorPipeLine: that build the dataset and dataloader and then return the embedding after passing the embedding weights.
 
-import tiktoken, torch
+import tiktoken, torch, os
 from torch.utils.data import Dataset, DataLoader
 from pydantic import FilePath
 
@@ -11,12 +11,14 @@ BPE_tokenizer = tiktoken.get_encoding('gpt2')
 
 #-----------------------------------------------------------------------------#
 class GPT2Dataset(Dataset):
-    def __init__(self, txt_file: FilePath, tokenizer: tiktoken.core.Encoding = BPE_tokenizer,
+    def __init__(self, txt_file: FilePath="", text="", tokenizer: tiktoken.core.Encoding = BPE_tokenizer,
                  max_length: int = 256, stride: int = 256):
-
-        with open(txt_file,'r') as f:
-            data_txt = f.read()
-            data_ids =  tokenizer.encode(data_txt)
+        if os.path.exists(txt_file):
+            with open(txt_file,'r') as f:
+                data_txt = f.read()
+        elif text:
+            data_txt = text
+        data_ids =  tokenizer.encode(data_txt)
 
         self.vocab_size = tokenizer.n_vocab
         
